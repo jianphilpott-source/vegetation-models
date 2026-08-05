@@ -154,59 +154,155 @@ counter=0; clc, %initialise couter and clear screen (watch out though - this doe
 %Swater(3,2,1)=1;Swind(3,2,1)=1; Scow(3,2,1)=1;
 %Swater(3,2,2)=1;Swind(3,2,2)=1; Scow(3,2,2)=1;
 
-%% ---------------- INITIALISE ANIMATION ----------------
+%% ================= INITIALISE SIX-PANEL ANIMATION =================
 
-animationEvery = 1;
+animationEvery = 1;   % Update every year
+                     % Use 5 or 10 if the animation is too slow
 
 animationFigure = figure( ...
-    'Name','Biomass and Resources', ...
+    'Name','Vegetation and Resource Dynamics', ...
     'NumberTitle','off', ...
     'Color','w');
 
-animationLayout = tiledlayout(animationFigure,1,3, ...
+animationFigure.Position = [50 50 1500 800];
+
+animationLayout = tiledlayout(animationFigure,2,3, ...
     'TileSpacing','compact', ...
     'Padding','compact');
 
-% Initial data
+%% Initial spatial data
+
 combinedBiomass = sum(field_species,3);
-totalWater = mid_resource(:,:,1) + deep_resource(:,:,1);
-totalNitrogen = mid_resource(:,:,2) + deep_resource(:,:,2);
 
-% Biomass axes
-axBiomass = nexttile(animationLayout,1);
-imageBiomass = imagesc(axBiomass,combinedBiomass);
-axis(axBiomass,'image');
-set(axBiomass,'YDir','normal');
-colorbar(axBiomass);
-title(axBiomass,'Combined biomass: year 0');
-xlabel(axBiomass,'x cell');
-ylabel(axBiomass,'y cell');
-clim(axBiomass,[0 sum(Bmax)]);
+totalWaterField = ...
+    mid_resource(:,:,1) + deep_resource(:,:,1);
 
-% Water axes
-axWater = nexttile(animationLayout,2);
-imageWater = imagesc(axWater,totalWater);
-axis(axWater,'image');
-set(axWater,'YDir','normal');
-colorbar(axWater);
-title(axWater,'Total water: year 0');
-xlabel(axWater,'x cell');
-ylabel(axWater,'y cell');
+totalNitrogenField = ...
+    mid_resource(:,:,2) + deep_resource(:,:,2);
 
-% Nitrogen axes
-axNitrogen = nexttile(animationLayout,3);
-imageNitrogen = imagesc(axNitrogen,totalNitrogen);
-axis(axNitrogen,'image');
-set(axNitrogen,'YDir','normal');
-colorbar(axNitrogen);
-title(axNitrogen,'Total nitrogen: year 0');
-xlabel(axNitrogen,'x cell');
-ylabel(axNitrogen,'y cell');
+%% ---------------- TOP ROW: SPATIAL MAPS ----------------
 
-title(animationLayout,'Vegetation and Resource Dynamics');
+% Combined biomass map
+axBiomassMap = nexttile(animationLayout,1);
+
+imageBiomass = imagesc(axBiomassMap,combinedBiomass);
+
+axis(axBiomassMap,'image');
+set(axBiomassMap,'YDir','normal');
+
+colorbar(axBiomassMap);
+
+xlabel(axBiomassMap,'x cell');
+ylabel(axBiomassMap,'y cell');
+
+title(axBiomassMap,'Combined biomass: year 0');
+
+% Maximum possible combined biomass per cell
+clim(axBiomassMap,[0 sum(Bmax)]);
+
+
+% Total water map
+axWaterMap = nexttile(animationLayout,2);
+
+imageWater = imagesc(axWaterMap,totalWaterField);
+
+axis(axWaterMap,'image');
+set(axWaterMap,'YDir','normal');
+
+colorbar(axWaterMap);
+
+xlabel(axWaterMap,'x cell');
+ylabel(axWaterMap,'y cell');
+
+title(axWaterMap,'Total water: year 0');
+
+
+% Total nitrogen map
+axNitrogenMap = nexttile(animationLayout,3);
+
+imageNitrogen = imagesc(axNitrogenMap,totalNitrogenField);
+
+axis(axNitrogenMap,'image');
+set(axNitrogenMap,'YDir','normal');
+
+colorbar(axNitrogenMap);
+
+xlabel(axNitrogenMap,'x cell');
+ylabel(axNitrogenMap,'y cell');
+
+title(axNitrogenMap,'Total nitrogen: year 0');
+
+
+%% ---------------- BOTTOM ROW: TIME-SERIES GRAPHS ----------------
+
+% Total biomass graph
+axBiomassGraph = nexttile(animationLayout,4);
+
+lineBiomass = animatedline(axBiomassGraph, ...
+    'LineWidth',1.5);
+
+grid(axBiomassGraph,'on');
+
+xlabel(axBiomassGraph,'Year');
+ylabel(axBiomassGraph,'Total biomass (g)');
+
+title(axBiomassGraph,'Total biomass through time');
+
+xlim(axBiomassGraph,[0 time]);
+
+
+% Total water graph
+axWaterGraph = nexttile(animationLayout,5);
+
+lineWater = animatedline(axWaterGraph, ...
+    'LineWidth',1.5);
+
+grid(axWaterGraph,'on');
+
+xlabel(axWaterGraph,'Year');
+ylabel(axWaterGraph,'Total water');
+
+title(axWaterGraph,'Total water through time');
+
+xlim(axWaterGraph,[0 time]);
+
+
+% Total nitrogen graph
+axNitrogenGraph = nexttile(animationLayout,6);
+
+lineNitrogen = animatedline(axNitrogenGraph, ...
+    'LineWidth',1.5);
+
+grid(axNitrogenGraph,'on');
+
+xlabel(axNitrogenGraph,'Year');
+ylabel(axNitrogenGraph,'Total nitrogen');
+
+title(axNitrogenGraph,'Total nitrogen through time');
+
+xlim(axNitrogenGraph,[0 time]);
+
+
+%% Add year-zero values to the graphs
+
+initialTotalBiomass = sum(field_species(:));
+
+initialTotalWater = ...
+    sum(mid_resource(:,:,1),'all') + ...
+    sum(deep_resource(:,:,1),'all');
+
+initialTotalNitrogen = ...
+    sum(mid_resource(:,:,2),'all') + ...
+    sum(deep_resource(:,:,2),'all');
+
+addpoints(lineBiomass,0,initialTotalBiomass);
+addpoints(lineWater,0,initialTotalWater);
+addpoints(lineNitrogen,0,initialTotalNitrogen);
+
+title(animationLayout, ...
+    'Vegetation and Resource Dynamics — Year 0');
 
 drawnow;
-%---------------TIME LOOP - CALCULATE CHANGE OF RESOURCE AND BIOMASS-------
 for loop=1:time  
     
 %Time loop - parameters recalcualted each time step
@@ -230,44 +326,94 @@ for loop=1:time
     [fn_r_and_p]=part_one(); %move resource according to biomass distribution
     %PART TWO - Calc use of resource by biomass, move remainder to mid and deep stores
     [fn_change_in_biomass]=part_two(); %Distribute biomass according to resource levels
-    %% ---------------- UPDATE ANIMATION ----------------
+    %% ================= UPDATE SIX-PANEL ANIMATION =================
 
     if mod(loop,animationEvery) == 0 || loop == time
 
+        %% Calculate current spatial fields
+
         combinedBiomass = sum(field_species,3);
-        totalWater = mid_resource(:,:,1) + deep_resource(:,:,1);
-        totalNitrogen = mid_resource(:,:,2) + deep_resource(:,:,2);
 
-        % Only update existing image data
+        totalWaterField = ...
+            mid_resource(:,:,1) + deep_resource(:,:,1);
+
+        totalNitrogenField = ...
+            mid_resource(:,:,2) + deep_resource(:,:,2);
+
+
+        %% Calculate whole-domain totals
+
+        totalBiomassValue = sum(field_species(:));
+
+        totalWaterValue = ...
+            sum(mid_resource(:,:,1),'all') + ...
+            sum(deep_resource(:,:,1),'all');
+
+        totalNitrogenValue = ...
+            sum(mid_resource(:,:,2),'all') + ...
+            sum(deep_resource(:,:,2),'all');
+
+
+        %% Update spatial maps
+
         imageBiomass.CData = combinedBiomass;
-        imageWater.CData = totalWater;
-        imageNitrogen.CData = totalNitrogen;
+        imageWater.CData = totalWaterField;
+        imageNitrogen.CData = totalNitrogenField;
 
-        title(axBiomass,sprintf('Combined biomass: year %d',loop));
-        title(axWater,sprintf('Total water: year %d',loop));
-        title(axNitrogen,sprintf('Total nitrogen: year %d',loop));
 
-        title(animationLayout, ...
-            sprintf('Vegetation and Resource Dynamics — Year %d of %d', ...
-            loop,time));
+        %% Update map titles
 
-        % Keep resource scales valid
-        waterMin = min(totalWater(:));
-        waterMax = max(totalWater(:));
+        title(axBiomassMap, ...
+            sprintf('Combined biomass: year %d',loop));
 
-        if isfinite(waterMin) && isfinite(waterMax) && waterMax > waterMin
-            clim(axWater,[waterMin waterMax]);
+        title(axWaterMap, ...
+            sprintf('Total water: year %d',loop));
+
+        title(axNitrogenMap, ...
+            sprintf('Total nitrogen: year %d',loop));
+
+
+        %% Update time-series graphs
+
+        addpoints(lineBiomass,loop,totalBiomassValue);
+        addpoints(lineWater,loop,totalWaterValue);
+        addpoints(lineNitrogen,loop,totalNitrogenValue);
+
+
+        %% Update resource colour limits
+
+        waterMin = min(totalWaterField(:));
+        waterMax = max(totalWaterField(:));
+
+        if isfinite(waterMin) && isfinite(waterMax) && ...
+                waterMax > waterMin
+
+            clim(axWaterMap,[waterMin waterMax]);
+
         end
 
-        nitrogenMin = min(totalNitrogen(:));
-        nitrogenMax = max(totalNitrogen(:));
+
+        nitrogenMin = min(totalNitrogenField(:));
+        nitrogenMax = max(totalNitrogenField(:));
 
         if isfinite(nitrogenMin) && isfinite(nitrogenMax) && ...
                 nitrogenMax > nitrogenMin
-            clim(axNitrogen,[nitrogenMin nitrogenMax]);
+
+            clim(axNitrogenMap,[nitrogenMin nitrogenMax]);
+
         end
 
-        drawnow;
+
+        %% Update overall title
+
+        title(animationLayout, ...
+            sprintf(['Vegetation and Resource Dynamics — ' ...
+            'Year %d of %d'],loop,time));
+
+
+        %% Render updated plots
+
+        drawnow limitrate;
     end
     %-----------STORE RESULTS----------------------------------------------
     time_series_plant(loop+1,1)=loop;   %Data for graphs - calculate average biomass of each species in field
