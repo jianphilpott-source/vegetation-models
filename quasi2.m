@@ -1,4 +1,7 @@
 function quasi2(constant_rainfall)
+close all;
+clc;
+
 %FULL VERSION - reads data from input file 
 %Multidirectional wind option
 %Note - 'field' refers to the x & y rectangular grid, cells are 1m^2 elements
@@ -219,10 +222,10 @@ mean_biomass_history(1) = ...
 window_length = 30;
 
 % Allowed relative change in the window mean and standard deviation
-quasi_steady_tolerance = 0.02;   % 5%
+quasi_steady_tolerance = 0.01;   % 5%
 
 % Number of consecutive successful comparisons required
-required_stable_windows = 5;
+required_stable_windows = 10;
 
 stable_window_count = 0;
 quasi_steady_year = NaN;
@@ -337,46 +340,19 @@ final_window = 50;
 
 final_biomass = mean(smoothed_biomass(end-final_window+1:end));
 
-%Derivative/Difference Criterion
-dBdt = [NaN; diff(smoothed_biomass)];
-
-figure
-
-plot(1:length(dBdt), dBdt,'LineWidth',1.5)
-hold on
-derivative_tolerance = 0.03;
-
-yline( derivative_tolerance,'r--','Tolerance')
-yline(-derivative_tolerance,'r--')
-
-xlabel('Year')
-ylabel('dB/dt')
-title('Derivative of smoothed mean biomass')
-grid on
-
-%% ---------------- DERIVATIVE-BASED QUASI-STEADY TEST ----------------
-%% ---------------- COMBINED QUASI-STEADY TEST ----------------
-
-biomass_tolerance = 0.005;      % 0.5%
-derivative_tolerance = 0.03;
-required_years = 10;
+biomass_tolerance = 0.05;   %Percentage Tolerance
+required_years = 50;   %Number of time steps required to stay within the tolerance
 
 for k = 2:(length(smoothed_biomass)-required_years+1)
 
     biomass_window = ...
         smoothed_biomass(k:k+required_years-1);
 
-    derivative_window = ...
-        dBdt(k:k+required_years-1);
-
     relative_error = ...
         abs(biomass_window-final_biomass) ./ ...
         abs(final_biomass);
 
-    mean_derivative = mean(abs(derivative_window));
-
-    if all(relative_error < biomass_tolerance) && ...
-       mean_derivative < derivative_tolerance
+    if all(relative_error < biomass_tolerance)
 
         quasi_steady_year = k-1;
         break
@@ -405,3 +381,4 @@ title('Mean biomass quasi-steady-state detection')
 
 legend('Location','southeast')
 grid on
+end
