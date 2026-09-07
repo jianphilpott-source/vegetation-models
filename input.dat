@@ -1,0 +1,80 @@
+%NOTE - Matlab reads data in column by row JS
+%integer value for years of simulation: time= (NB - should equal lines of data in raindat.dat) 312
+500
+%size of simulated area (no. cells x no. cells): fieldsize =
+30
+%number of vectors (wind, water, cows): vectors =
+3
+%number of Resources and Propagules: randp=
+2             
+%number of plant species: species=
+2
+%wind direction is downhill=1 uphill=2 L-to-R=3 R-to-L=4
+1   
+%Gradient of slope (for water smoosh) as percentage
+2
+%Limiting growth rate for each species [species x 1] (% increase): growth=
+1.125 
+1.09
+%Maximum biomass for each species [species x 1] (g/m^2): Bmax= 
+319 
+222       
+%vertical flux terms [randp x 1] (g / m^2) - 1=water, 2=nitrogen: QV=
+243
+1.5
+% Maintenence of plant biomass from ecotone [species x randp] (g resource / g biomass) : Maintenance=
+3.5    0.0273 
+2.48   0.0273 
+%Resource use of R&P during growth [species x randp] (g  resource / g biomass) - row=species and column=R&P: Efficiency=
+17.5  0.0273
+12.4  0.0273
+%define failure rate of each species [species x 1] (1/a): fail=
+0.005 
+0.005
+%define mortality rate of each species [species x 1] (1/a): mort=
+0.01 
+0.01
+%drout intolerance - subtraction of biomass [species x 1] : drought=
+1.6
+1.5  
+% Reproduction control [species * vector]  as % :
+0.75   0.2  0.05
+0.85   0.1  0.05
+% initialize vegetation type matrix [fieldsize x fieldsize] initialize cover of each vegetation type in turn 
+%[fieldsize x fieldsize] (g): field (:, :, 1...)=
+60
+5     
+%Initial values of mid_resource, for each type of R and P (water - g/m2, N - g/m2)75/1
+25
+0.5
+%Initial values of deep_resource in deep layer, for each type of R and P (water - g/m2, N - g/m2)75/1
+25
+0.5
+% Random field flag 1= use random, 0=uniform
+1
+%Specify advection matrices for resources(species1=3x3,species2=3x3)
+%water
+0       0.1     0
+0.1     0.5     0.1
+0.05    0.1     0.05
+0       0.2     0
+0.05    0.5     0.05
+0.05    0.1     0.05
+%water
+0.0625 0.0625 0.0625 
+0.0625 0.5    0.0625
+0.0625 0.0625 0.0625
+%wind
+0      0.05    0
+0.15   0.5     0.15
+0.05   0.05    0.05
+0      0.05    0
+0.05   0.45    0.05
+0.05   0.3     0.05
+%Moo
+0.1    0.1    0.1
+0.1    0.2    0.1
+0.1    0.1    0.1
+0.0625 0.0625 0.0625 
+0.0625 0.5    0.0625
+0.0625 0.0625 0.0625            
